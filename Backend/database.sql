@@ -1,4 +1,4 @@
--- Create users table
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(60) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create stores table
+
 CREATE TABLE stores (
   id SERIAL PRIMARY KEY,
   name VARCHAR(60) NOT NULL,
@@ -21,7 +21,6 @@ CREATE TABLE stores (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create ratings table
 CREATE TABLE ratings (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -32,7 +31,7 @@ CREATE TABLE ratings (
   UNIQUE(user_id, store_id)
 );
 
--- Create indexes for better query performance
+
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_stores_email ON stores(email);
