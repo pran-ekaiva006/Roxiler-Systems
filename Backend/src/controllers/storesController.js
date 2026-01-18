@@ -27,24 +27,45 @@ export const createStore = async (req, res) => {
 // Admin: Get all stores with ratings
 export const getAllStores = async (req, res) => {
   try {
-    const { sortBy = "name", order = "ASC", search } = req.query;
+    const { sortBy = "name", order = "ASC", name, email, address } = req.query;
 
     let query = `
       SELECT s.*, 
              ROUND(AVG(r.rating)::numeric, 2) as average_rating,
-             COUNT(r.id) as total_ratings
+             COUNT(r.id) as total_ratings,
+             u.name as owner_name
       FROM stores s
       LEFT JOIN ratings r ON s.id = r.store_id
+      LEFT JOIN users u ON s.owner_id = u.id
     `;
 
     const params = [];
+    let paramCount = 1;
+    const conditions = [];
 
-    if (search) {
-      query += ` WHERE s.name ILIKE $1 OR s.address ILIKE $1`;
-      params.push(`%${search}%`);
+    if (name) {
+      conditions.push(`s.name ILIKE $${paramCount}`);
+      params.push(`%${name}%`);
+      paramCount++;
     }
 
-    query += ` GROUP BY s.id ORDER BY s.${sortBy} ${order}`;
+    if (email) {
+      conditions.push(`s.email ILIKE $${paramCount}`);
+      params.push(`%${email}%`);
+      paramCount++;
+    }
+
+    if (address) {
+      conditions.push(`s.address ILIKE $${paramCount}`);
+      params.push(`%${address}%`);
+      paramCount++;
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(" AND ")}`;
+    }
+
+    query += ` GROUP BY s.id, s.name, s.email, s.address, s.owner_id, s.created_at, s.updated_at, u.name ORDER BY s.${sortBy} ${order}`;
 
     const result = await pool.query(query, params);
     res.json({ stores: result.rows });
@@ -54,9 +75,10 @@ export const getAllStores = async (req, res) => {
 };
 
 // Normal User: Get all stores
+// Store Owner: Can also use this to view all stores, or get their own store
 export const getStoresForUser = async (req, res) => {
   try {
-    const { sortBy = "name", order = "ASC", search } = req.query;
+    const { sortBy = "name", order = "ASC", search, owner } = req.query;
     const userId = req.user.id;
 
     let query = `
@@ -70,11 +92,23 @@ export const getStoresForUser = async (req, res) => {
 
     const params = [userId];
     let paramCount = 2;
+    const conditions = [];
+
+    // If store owner wants their own store
+    if (owner === "true" && req.user.role === "store_owner") {
+      conditions.push(`s.owner_id = $${paramCount}`);
+      params.push(userId);
+      paramCount++;
+    }
 
     if (search) {
-      query += ` WHERE s.name ILIKE $${paramCount} OR s.address ILIKE $${paramCount}`;
+      conditions.push(`(s.name ILIKE $${paramCount} OR s.address ILIKE $${paramCount})`);
       params.push(`%${search}%`);
       paramCount++;
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
     query += ` GROUP BY s.id, ur.rating ORDER BY s.${sortBy} ${order}`;

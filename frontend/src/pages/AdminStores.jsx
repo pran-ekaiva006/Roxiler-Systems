@@ -8,6 +8,8 @@ export default function AdminStores() {
   const [stores, setStores] = useState([]);
   const [owners, setOwners] = useState([]);
   const [filters, setFilters] = useState({ name: "", email: "", address: "" });
+  const [sortBy, setSortBy] = useState("name");
+  const [order, setOrder] = useState("ASC");
   const [loading, setLoading] = useState(false);
   const [showAddStore, setShowAddStore] = useState(false);
   const { logout } = useAuth();
@@ -20,7 +22,7 @@ export default function AdminStores() {
   const fetchStores = async (custom = filters) => {
     setLoading(true);
     try {
-      const res = await storesAPI.getAllStores(custom);
+      const res = await storesAPI.getAllStores({ ...custom, sortBy, order });
       setStores(res.data.stores || []);
     } catch (err) {
       console.error("Fetch stores error:", err.response?.data || err.message);
@@ -44,6 +46,20 @@ export default function AdminStores() {
     fetchStores(newFilters);
   };
 
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setOrder(order === "ASC" ? "DESC" : "ASC");
+    } else {
+      setSortBy(field);
+      setOrder("ASC");
+    }
+  };
+
+  useEffect(() => {
+    fetchStores(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, order]);
+
   return (
     <div className="container">
       <div className="header">
@@ -66,9 +82,16 @@ export default function AdminStores() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Address</th>
+              <th>
+                <button onClick={() => handleSort("name")}>Name ↕</button>
+              </th>
+              <th>
+                <button onClick={() => handleSort("email")}>Email ↕</button>
+              </th>
+              <th>
+                <button onClick={() => handleSort("address")}>Address ↕</button>
+              </th>
+              <th>Rating</th>
               <th>Owner</th>
             </tr>
           </thead>
@@ -78,12 +101,13 @@ export default function AdminStores() {
                 <td>{s.name}</td>
                 <td>{s.email}</td>
                 <td>{s.address}</td>
+                <td>{s.average_rating ? `${s.average_rating} ⭐` : "No ratings"}</td>
                 <td>{s.owner_name || "-"}</td>
               </tr>
             ))}
             {stores.length === 0 && (
               <tr>
-                <td colSpan="4" align="center">No stores found</td>
+                <td colSpan="5" align="center">No stores found</td>
               </tr>
             )}
           </tbody>

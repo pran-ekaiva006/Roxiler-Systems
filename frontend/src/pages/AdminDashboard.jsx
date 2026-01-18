@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { usersAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import AddUserModal from "../components/AddUserModal";
@@ -9,6 +10,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchStats();
@@ -39,20 +41,28 @@ export default function AdminDashboard() {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div className="stats-grid">
-          <div className="stat-card">
-            <h3>Total Users</h3>
-            <p className="stat-number">{stats.total_users}</p>
+        <>
+          <div className="stats-grid">
+            <div className="stat-card" onClick={() => navigate("/admin/users")} style={{ cursor: "pointer" }}>
+              <h3>Total Users</h3>
+              <p className="stat-number">{stats.total_users}</p>
+              <p style={{ marginTop: "10px", fontSize: "14px", color: "#667eea" }}>View Users →</p>
+            </div>
+            <div className="stat-card" onClick={() => navigate("/admin/stores")} style={{ cursor: "pointer" }}>
+              <h3>Total Stores</h3>
+              <p className="stat-number">{stats.total_stores}</p>
+              <p style={{ marginTop: "10px", fontSize: "14px", color: "#667eea" }}>View Stores →</p>
+            </div>
+            <div className="stat-card">
+              <h3>Total Ratings</h3>
+              <p className="stat-number">{stats.total_ratings}</p>
+            </div>
           </div>
-          <div className="stat-card">
-            <h3>Total Stores</h3>
-            <p className="stat-number">{stats.total_stores}</p>
+          <div style={{ marginTop: "30px", display: "flex", gap: "10px" }}>
+            <button onClick={() => navigate("/admin/users")}>Manage Users</button>
+            <button onClick={() => navigate("/admin/stores")}>Manage Stores</button>
           </div>
-          <div className="stat-card">
-            <h3>Total Ratings</h3>
-            <p className="stat-number">{stats.total_ratings}</p>
-          </div>
-        </div>
+        </>
       )}
 
       {showAddUser && (

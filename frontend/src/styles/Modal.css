@@ -22,7 +22,35 @@
   padding: 8px;
 }
 
+.field-error {
+  display: block;
+  color: #721c24;
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 8px;
+  background: #f8d7da;
+  padding: 5px 8px;
+  border-radius: 3px;
+  border: 1px solid #f5c6cb;
+}
+
 .modal-actions {
   display: flex;
   justify-content: space-between;
+}
+
+.user-details {
+  margin: 20px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-row strong {
+  color: #667eea;
+  width: 150px;
 }

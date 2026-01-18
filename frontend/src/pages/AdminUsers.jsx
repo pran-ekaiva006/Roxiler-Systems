@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { usersAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import AddUserModal from "../components/AddUserModal";
+import UserDetailModal from "../components/UserDetailModal";
 import "../styles/Dashboard.css";
 
 export default function AdminUsers() {
@@ -12,8 +13,11 @@ export default function AdminUsers() {
     address: "",
     role: "",
   });
+  const [sortBy, setSortBy] = useState("name");
+  const [order, setOrder] = useState("ASC");
   const [loading, setLoading] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const { logout } = useAuth();
 
   useEffect(() => {
@@ -23,7 +27,7 @@ export default function AdminUsers() {
   const fetchUsers = async (customFilters = filters) => {
     setLoading(true);
     try {
-      const res = await usersAPI.getAllUsers(customFilters);
+      const res = await usersAPI.getAllUsers({ ...customFilters, sortBy, order });
       setUsers(res.data.users || []);
     } catch (err) {
       console.error("Fetch users error:", err.response?.data || err.message);
@@ -37,6 +41,20 @@ export default function AdminUsers() {
     setFilters(newFilters);
     fetchUsers(newFilters);
   };
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setOrder(order === "ASC" ? "DESC" : "ASC");
+    } else {
+      setSortBy(field);
+      setOrder("ASC");
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, order]);
 
   return (
     <div className="container">
@@ -67,15 +85,23 @@ export default function AdminUsers() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Address</th>
-              <th>Role</th>
+              <th>
+                <button onClick={() => handleSort("name")}>Name ↕</button>
+              </th>
+              <th>
+                <button onClick={() => handleSort("email")}>Email ↕</button>
+              </th>
+              <th>
+                <button onClick={() => handleSort("address")}>Address ↕</button>
+              </th>
+              <th>
+                <button onClick={() => handleSort("role")}>Role ↕</button>
+              </th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id}>
+              <tr key={u.id} onClick={() => setSelectedUserId(u.id)} style={{ cursor: "pointer" }}>
                 <td>{u.name}</td>
                 <td>{u.email}</td>
                 <td>{u.address}</td>
@@ -98,6 +124,13 @@ export default function AdminUsers() {
             setShowAddUser(false);
             fetchUsers();
           }}
+        />
+      )}
+
+      {selectedUserId && (
+        <UserDetailModal
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
         />
       )}
     </div>

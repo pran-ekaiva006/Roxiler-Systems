@@ -3,7 +3,7 @@ import { z } from "zod";
 export const signupSchema = z.object({
   name: z
     .string()
-    .min(3, "Name must be at least 3 characters")
+    .min(20, "Name must be at least 20 characters")
     .max(60, "Name must not exceed 60 characters"),
   email: z.string().email("Invalid email format"),
   address: z.string().max(400, "Address must not exceed 400 characters").optional(),

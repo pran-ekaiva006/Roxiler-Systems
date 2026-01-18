@@ -26,7 +26,7 @@ export default function AddStoreModal({ owners, onClose, onSuccess }) {
         name: form.name,
         email: form.email,
         address: form.address,
-        ownerId: form.ownerId || null,
+        owner_id: form.ownerId || null,
       });
       onSuccess();
     } catch (err) {

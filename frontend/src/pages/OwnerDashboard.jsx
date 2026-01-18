@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ratingsAPI, storesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import UpdatePasswordModal from "../components/UpdatePasswordModal";
 import "../styles/Dashboard.css";
 
 export default function OwnerDashboard() {
@@ -9,6 +10,7 @@ export default function OwnerDashboard() {
   const [ratings, setRatings] = useState([]);
   const [average, setAverage] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   useEffect(() => {
     fetchMyStore();
@@ -32,7 +34,7 @@ export default function OwnerDashboard() {
     try {
       const res = await ratingsAPI.getStoreRatings(storeId);
       setRatings(res.data.ratings || []);
-      setAverage(res.data.average || 0);
+      setAverage(res.data.average_rating || 0);
     } catch (err) {
       console.error("Ratings fetch error:", err.response?.data || err.message);
     } finally {
@@ -44,8 +46,21 @@ export default function OwnerDashboard() {
     <div className="container">
       <div className="header">
         <h1>Store Owner Dashboard</h1>
-        <button onClick={logout} className="logout-btn">Logout</button>
+        <div>
+          <button onClick={() => setShowPasswordModal(true)}>Update Password</button>
+          <button onClick={logout} className="logout-btn">Logout</button>
+        </div>
       </div>
+
+      {showPasswordModal && (
+        <UpdatePasswordModal
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={() => {
+            setShowPasswordModal(false);
+            alert("Password updated successfully!");
+          }}
+        />
+      )}
 
       {!store ? (
         <p>No store assigned to you.</p>
@@ -68,7 +83,7 @@ export default function OwnerDashboard() {
               <tbody>
                 {ratings.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.user_name}</td>
+                    <td>{r.name || r.user_name}</td>
                     <td>{r.rating}</td>
                   </tr>
                 ))}

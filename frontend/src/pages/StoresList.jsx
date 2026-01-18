@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { storesAPI, ratingsAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import UpdatePasswordModal from "../components/UpdatePasswordModal";
 import "../styles/StoresList.css";
 
 export default function StoresList() {
@@ -8,6 +9,7 @@ export default function StoresList() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [ratingForm, setRatingForm] = useState({});
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const { logout } = useAuth();
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function StoresList() {
   const fetchStores = async (searchTerm = "") => {
     setLoading(true);
     try {
-      const response = await storesAPI.getStoresForUser({ q: searchTerm });
+      const response = await storesAPI.getStoresForUser({ search: searchTerm });
       const storeData = response.data.stores || [];
       setStores(storeData);
 
@@ -71,8 +73,21 @@ export default function StoresList() {
     <div className="container">
       <div className="header">
         <h1>Available Stores</h1>
-        <button onClick={logout} className="logout-btn">Logout</button>
+        <div>
+          <button onClick={() => setShowPasswordModal(true)}>Update Password</button>
+          <button onClick={logout} className="logout-btn">Logout</button>
+        </div>
       </div>
+
+      {showPasswordModal && (
+        <UpdatePasswordModal
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={() => {
+            setShowPasswordModal(false);
+            alert("Password updated successfully!");
+          }}
+        />
+      )}
 
       <input
         type="text"
@@ -98,7 +113,7 @@ export default function StoresList() {
                 <p>Email: {store.email}</p>
 
                 <div className="rating-section">
-                  <p>⭐ Rating: {store.avg_rating ?? "No ratings yet"}</p>
+                  <p>⭐ Rating: {store.average_rating ?? "No ratings yet"}</p>
                   <p>Your Rating: {store.user_rating ?? "Not rated"}</p>
 
                   <div className="rating-input">
