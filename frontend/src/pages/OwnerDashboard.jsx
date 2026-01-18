@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { ratingsAPI, storesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import "../styles/Dashboard.css";
 
 export default function OwnerDashboard() {
-  const { auth, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const [store, setStore] = useState(null);
   const [ratings, setRatings] = useState([]);
   const [average, setAverage] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [storeId, setStoreId] = useState(null);
 
   useEffect(() => {
     fetchMyStore();
@@ -15,26 +16,25 @@ export default function OwnerDashboard() {
 
   const fetchMyStore = async () => {
     try {
-      // assuming backend has route: /stores/owner
       const res = await storesAPI.getStoresForUser({ owner: true });
       const myStore = res.data.stores?.[0];
       if (myStore) {
-        setStoreId(myStore.id);
+        setStore(myStore);
         fetchRatings(myStore.id);
       }
     } catch (err) {
-      console.error("Fetch owner store failed:", err.response?.data || err.message);
+      console.error("Owner store fetch error:", err.response?.data || err.message);
     }
   };
 
-  const fetchRatings = async (id) => {
+  const fetchRatings = async (storeId) => {
     setLoading(true);
     try {
-      const res = await ratingsAPI.getStoreRatings(id);
+      const res = await ratingsAPI.getStoreRatings(storeId);
       setRatings(res.data.ratings || []);
       setAverage(res.data.average || 0);
     } catch (err) {
-      console.error("Fetch ratings failed:", err.response?.data || err.message);
+      console.error("Ratings fetch error:", err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -47,11 +47,13 @@ export default function OwnerDashboard() {
         <button onClick={logout} className="logout-btn">Logout</button>
       </div>
 
-      {!storeId ? (
+      {!store ? (
         <p>No store assigned to you.</p>
       ) : (
         <>
-          <h3>Average Rating: {average}</h3>
+          <h2>{store.name}</h2>
+          <p>📍 {store.address}</p>
+          <p>⭐ Average Rating: {average}</p>
 
           {loading ? (
             <p>Loading ratings...</p>
