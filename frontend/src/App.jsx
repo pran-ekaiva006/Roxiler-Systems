@@ -1,70 +1,82 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StoresList from "./pages/StoresList";
 import AdminDashboard from "./pages/AdminDashboard";
-import "./styles/index.css";
+import OwnerDashboard from "./pages/OwnerDashboard";
 
-function ProtectedRoute({ children, requiredRole }) {
-  const { user, loading } = useAuth();
+function ProtectedRoute({ children, allowedRoles }) {
+  const { auth, loading } = useAuth();
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/login" />;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (!auth) return <Navigate to="/login" />;
+  if (!allowedRoles.includes(auth.user.role)) return <Navigate to="/login" />;
 
   return children;
 }
 
 function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { auth, loading } = useAuth();
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Routes>
+      {/* Public */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      
+
+      {/* Normal User */}
       <Route
         path="/stores"
         element={
-          <ProtectedRoute requiredRole="normal_user">
+          <ProtectedRoute allowedRoles={["normal_user"]}>
             <StoresList />
           </ProtectedRoute>
         }
       />
-      
+
+      {/* Admin */}
       <Route
         path="/admin/dashboard"
         element={
-          <ProtectedRoute requiredRole="admin">
+          <ProtectedRoute allowedRoles={["admin"]}>
             <AdminDashboard />
           </ProtectedRoute>
         }
       />
 
-      <Route 
-        path="/" 
+      {/* Store Owner */}
+      <Route
+        path="/store-owner/dashboard"
         element={
-          user ? (
-            <Navigate to={user.role === "admin" ? "/admin/dashboard" : "/stores"} />
+          <ProtectedRoute allowedRoles={["store_owner"]}>
+            <OwnerDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Default */}
+      <Route
+        path="/"
+        element={
+          auth ? (
+            auth.user.role === "admin" ? (
+              <Navigate to="/admin/dashboard" />
+            ) : auth.user.role === "store_owner" ? (
+              <Navigate to="/store-owner/dashboard" />
+            ) : (
+              <Navigate to="/stores" />
+            )
           ) : (
             <Navigate to="/login" />
           )
-        } 
+        }
       />
+
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

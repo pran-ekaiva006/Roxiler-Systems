@@ -1,8 +1,6 @@
 import axios from "axios";
 
-
 const API_BASE_URL = "http://localhost:5001/api";
-
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,9 +12,12 @@ const api = axios.create({
 
 // Add token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const saved = localStorage.getItem("auth");
+  if (saved) {
+    const { token } = JSON.parse(saved);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -30,7 +31,7 @@ api.interceptors.response.use(
       return Promise.reject({
         response: {
           data: {
-            error: "Cannot connect to server. Please ensure backend is running on http://localhost:5000",
+            error: "Cannot connect to server. Please ensure backend is running on http://localhost:5001",
           },
         },
       });
@@ -39,10 +40,10 @@ api.interceptors.response.use(
     console.error("API Error:", error.response?.data || error.message);
 
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      localStorage.removeItem("auth");
       window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );

@@ -17,8 +17,8 @@ export default function StoresList() {
   const fetchStores = async (searchTerm = "") => {
     setLoading(true);
     try {
-      const response = await storesAPI.getStoresForUser({ search: searchTerm });
-      setStores(response.data.stores);
+      const response = await storesAPI.getStoresForUser({ q: searchTerm });
+      setStores(response.data.stores || []);
     } catch (err) {
       console.error("Error fetching stores:", err);
     } finally {
@@ -39,13 +39,14 @@ export default function StoresList() {
   const submitRating = async (storeId) => {
     try {
       await ratingsAPI.submitRating({
-        store_id: storeId,
-        rating: parseInt(ratingForm[storeId]),
+        storeId: storeId,
+        rating: Number(ratingForm[storeId]),
       });
       fetchStores(search);
       setRatingForm({ ...ratingForm, [storeId]: "" });
     } catch (err) {
-      console.error("Error submitting rating:", err);
+      console.error("Error submitting rating:", err.response?.data || err.message);
+      alert(err.response?.data?.error || "Rating failed");
     }
   };
 
@@ -55,6 +56,7 @@ export default function StoresList() {
         <h1>Available Stores</h1>
         <button onClick={logout} className="logout-btn">Logout</button>
       </div>
+
       <input
         type="text"
         placeholder="Search by name or address"
@@ -72,9 +74,11 @@ export default function StoresList() {
               <h3>{store.name}</h3>
               <p>📍 {store.address}</p>
               <p>Email: {store.email}</p>
+
               <div className="rating-section">
-                <p>⭐ Rating: {store.average_rating || "No ratings yet"}</p>
-                <p>Your Rating: {store.user_rating || "Not rated"}</p>
+                <p>⭐ Rating: {store.avg_rating ?? "No ratings yet"}</p>
+                <p>Your Rating: {store.user_rating ?? "Not rated"}</p>
+
                 <div className="rating-input">
                   <select
                     value={ratingForm[store.id] || ""}
@@ -87,11 +91,19 @@ export default function StoresList() {
                     <option value="4">4 - Very Good</option>
                     <option value="5">5 - Excellent</option>
                   </select>
-                  <button onClick={() => submitRating(store.id)}>Submit Rating</button>
+
+                  <button
+                    disabled={!ratingForm[store.id]}
+                    onClick={() => submitRating(store.id)}
+                  >
+                    Submit Rating
+                  </button>
                 </div>
               </div>
             </div>
           ))}
+
+          {stores.length === 0 && <p>No stores found</p>}
         </div>
       )}
     </div>

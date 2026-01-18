@@ -22,12 +22,18 @@ export default function Login() {
 
     try {
       const response = await authAPI.login(formData);
-      login(response.data.user, response.data.token);
+
+      // Save auth in context + localStorage
+      login({
+        token: response.data.token,
+        user: response.data.user,
+      });
 
       // Redirect based on role
-      if (response.data.user.role === "admin") {
+      const role = response.data.user.role;
+      if (role === "admin") {
         navigate("/admin/dashboard");
-      } else if (response.data.user.role === "store_owner") {
+      } else if (role === "store_owner") {
         navigate("/store-owner/dashboard");
       } else {
         navigate("/stores");
