@@ -11,17 +11,21 @@ dotenv.config();
 
 const app = express();
 
-// CORS Configuration - Must be BEFORE routes
+// ✅ FIXED CORS
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:3000"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://roxiler-systems-nine.vercel.app",
+    "https://roxiler-systems-yix797udg-pranjals-projects-fb70e5de.vercel.app",
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 200,
 };
 
-// Apply CORS to all routes
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // handle preflight
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -36,11 +40,9 @@ app.get("/", (req, res) => {
   res.json({ message: "API running successfully" });
 });
 
-// Error handling middleware (must be last)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`✅ CORS enabled for: ${corsOptions.origin.join(", ")}`);
+  console.log(`Server running on port ${PORT}`);
 });

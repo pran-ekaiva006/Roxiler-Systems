@@ -1,12 +1,14 @@
 import axios from "axios";
 
+// Backend base from Vite env
 const BACKEND = import.meta.env.VITE_BACKEND_URL;
 
 if (!BACKEND) {
   console.error("VITE_BACKEND_URL is not defined");
 }
 
-const API_BASE_URL = BACKEND + "/api";
+// Your backend runs at root, not /api
+const API_BASE_URL = BACKEND;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -16,7 +18,7 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Add token to requests
+// Attach token
 api.interceptors.request.use((config) => {
   const saved = localStorage.getItem("auth");
   if (saved) {
@@ -28,7 +30,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle response errors
+// Handle errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -54,6 +56,7 @@ api.interceptors.response.use(
   }
 );
 
+// APIs
 export const authAPI = {
   signup: (data) => api.post("/auth/signup", data),
   login: (data) => api.post("/auth/login", data),
