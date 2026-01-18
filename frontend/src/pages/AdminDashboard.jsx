@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { usersAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import AddUserModal from "../components/AddUserModal";
 import "../styles/Dashboard.css";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ total_users: 0, total_stores: 0, total_ratings: 0 });
   const [loading, setLoading] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
   const { logout } = useAuth();
 
   useEffect(() => {
@@ -28,8 +30,12 @@ export default function AdminDashboard() {
     <div className="container">
       <div className="header">
         <h1>Admin Dashboard</h1>
-        <button onClick={logout} className="logout-btn">Logout</button>
+        <div>
+          <button onClick={() => setShowAddUser(true)}>Add User</button>
+          <button onClick={logout} className="logout-btn">Logout</button>
+        </div>
       </div>
+
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -47,6 +53,16 @@ export default function AdminDashboard() {
             <p className="stat-number">{stats.total_ratings}</p>
           </div>
         </div>
+      )}
+
+      {showAddUser && (
+        <AddUserModal
+          onClose={() => setShowAddUser(false)}
+          onSuccess={() => {
+            setShowAddUser(false);
+            fetchStats();
+          }}
+        />
       )}
     </div>
   );

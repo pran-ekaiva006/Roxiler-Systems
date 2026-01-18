@@ -26,13 +26,13 @@ export default function AdminUsers() {
       const res = await usersAPI.getAllUsers(customFilters);
       setUsers(res.data.users || []);
     } catch (err) {
-      console.error("Fetch users error:", err);
+      console.error("Fetch users error:", err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
+  const handleFilterChange = (e) => {
     const newFilters = { ...filters, [e.target.name]: e.target.value };
     setFilters(newFilters);
     fetchUsers(newFilters);
@@ -50,10 +50,10 @@ export default function AdminUsers() {
 
       {/* Filters */}
       <div className="filter-bar">
-        <input name="name" placeholder="Filter by Name" onChange={handleChange} />
-        <input name="email" placeholder="Filter by Email" onChange={handleChange} />
-        <input name="address" placeholder="Filter by Address" onChange={handleChange} />
-        <select name="role" onChange={handleChange}>
+        <input name="name" placeholder="Name" onChange={handleFilterChange} />
+        <input name="email" placeholder="Email" onChange={handleFilterChange} />
+        <input name="address" placeholder="Address" onChange={handleFilterChange} />
+        <select name="role" onChange={handleFilterChange}>
           <option value="">All Roles</option>
           <option value="admin">Admin</option>
           <option value="normal_user">Normal User</option>
@@ -84,7 +84,7 @@ export default function AdminUsers() {
             ))}
             {users.length === 0 && (
               <tr>
-                <td colSpan="4">No users found</td>
+                <td colSpan="4" align="center">No users found</td>
               </tr>
             )}
           </tbody>
