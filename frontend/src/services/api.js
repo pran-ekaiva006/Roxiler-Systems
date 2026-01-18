@@ -1,6 +1,11 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5001/api";
+// Use Vite env variable
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+if (!API_BASE_URL) {
+  console.error("VITE_BACKEND_URL is not defined in .env file");
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -31,7 +36,7 @@ api.interceptors.response.use(
       return Promise.reject({
         response: {
           data: {
-            error: "Cannot connect to server. Please ensure backend is running on http://localhost:5001",
+            error: `Cannot connect to server. Backend not reachable at ${API_BASE_URL}`,
           },
         },
       });
