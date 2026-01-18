@@ -58,9 +58,9 @@ Use these credentials to explore different user roles:
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | admin@roxiler.com | Admin@123 |
-| **Store Owner** | owner@roxiler.com | Owner@123 |
-| **Normal User** | user@roxiler.com | User@123 |
+| **Admin** | admin@test.com | 123456789A@ |
+| **Store Owner** | owner2@test.com | $2b$10$dummyhash2 |
+| **Normal User** | user2@test.com | $2b$10$dummyhashu2 |
 
 ---
 
