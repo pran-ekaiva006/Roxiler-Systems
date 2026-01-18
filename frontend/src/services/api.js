@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // Use Vite env variable
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL + "/api";
+
 
 if (!API_BASE_URL) {
   console.error("VITE_BACKEND_URL is not defined in .env file");
