@@ -9,13 +9,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const saved = localStorage.getItem("auth");
     if (saved) {
-      setAuth(JSON.parse(saved));
+      try {
+        setAuth(JSON.parse(saved));
+      } catch {
+        localStorage.removeItem("auth");
+        setAuth(null);
+      }
     }
     setLoading(false);
   }, []);
 
-  const login = (data) => {
-    // data = { token, user }
+  const login = ({ token, user }) => {
+    const data = { token, user };
     setAuth(data);
     localStorage.setItem("auth", JSON.stringify(data));
   };
@@ -23,10 +28,20 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setAuth(null);
     localStorage.removeItem("auth");
+    window.location.href = "/login";
   };
 
   return (
-    <AuthContext.Provider value={{ auth, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        auth,
+        user: auth?.user || null,
+        token: auth?.token || null,
+        login,
+        logout,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

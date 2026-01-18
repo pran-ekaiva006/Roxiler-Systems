@@ -10,17 +10,17 @@ import AdminStores from "./pages/AdminStores";
 import OwnerDashboard from "./pages/OwnerDashboard";
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const { auth, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  if (!auth) return <Navigate to="/login" />;
-  if (!allowedRoles.includes(auth.user.role)) return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" />;
+  if (!allowedRoles.includes(user.role)) return <Navigate to="/login" />;
 
   return children;
 }
 
 function AppRoutes() {
-  const { auth, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
 
@@ -80,10 +80,10 @@ function AppRoutes() {
       <Route
         path="/"
         element={
-          auth ? (
-            auth.user.role === "admin" ? (
+          user ? (
+            user.role === "admin" ? (
               <Navigate to="/admin/dashboard" />
-            ) : auth.user.role === "store_owner" ? (
+            ) : user.role === "store_owner" ? (
               <Navigate to="/store-owner/dashboard" />
             ) : (
               <Navigate to="/stores" />

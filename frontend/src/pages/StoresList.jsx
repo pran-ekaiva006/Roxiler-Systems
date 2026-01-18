@@ -19,11 +19,10 @@ export default function StoresList() {
   const fetchStores = async (searchTerm = "") => {
     setLoading(true);
     try {
-      const response = await storesAPI.getStoresForUser({ search: searchTerm });
+      const response = await storesAPI.getStoresForUser({ q: searchTerm });
       const storeData = response.data.stores || [];
       setStores(storeData);
 
-      // preload user ratings in dropdown
       const preset = {};
       storeData.forEach((s) => {
         if (s.user_rating !== null && s.user_rating !== undefined) {
@@ -50,7 +49,6 @@ export default function StoresList() {
 
   const submitRating = async (storeId) => {
     const rating = ratingForm[storeId];
-
     if (!storeId || !rating) {
       alert("Please select a rating first");
       return;
@@ -61,7 +59,6 @@ export default function StoresList() {
         store_id: storeId,
         rating: Number(rating),
       });
-
       fetchStores(search);
     } catch (err) {
       console.error("Error submitting rating:", err.response?.data || err.message);
@@ -71,11 +68,21 @@ export default function StoresList() {
 
   return (
     <div className="container">
-      <div className="header">
-        <h1>Available Stores</h1>
-        <div>
-          <button onClick={() => setShowPasswordModal(true)}>Update Password</button>
-          <button onClick={logout} className="logout-btn">Logout</button>
+      {/* Navbar */}
+      <div className="navbar">
+        <div className="nav-left">
+          <h1>Store Ratings</h1>
+        </div>
+        <div className="nav-right">
+          <button
+            className="nav-btn secondary"
+            onClick={() => setShowPasswordModal(true)}
+          >
+            Update Password
+          </button>
+          <button className="nav-btn danger" onClick={logout}>
+            Logout
+          </button>
         </div>
       </div>
 
@@ -89,6 +96,7 @@ export default function StoresList() {
         />
       )}
 
+      {/* Search */}
       <input
         type="text"
         placeholder="Search by name or address"
@@ -113,7 +121,7 @@ export default function StoresList() {
                 <p>Email: {store.email}</p>
 
                 <div className="rating-section">
-                  <p>⭐ Rating: {store.average_rating ?? "No ratings yet"}</p>
+                  <p>⭐ Rating: {store.avg_rating ?? "No ratings yet"}</p>
                   <p>Your Rating: {store.user_rating ?? "Not rated"}</p>
 
                   <div className="rating-input">

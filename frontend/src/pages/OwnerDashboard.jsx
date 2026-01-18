@@ -18,14 +18,17 @@ export default function OwnerDashboard() {
 
   const fetchMyStore = async () => {
     try {
-      const res = await storesAPI.getStoresForUser({ owner: true });
+      const res = await storesAPI.getStoresForUser({ owner: "true" });
       const myStore = res.data.stores?.[0];
       if (myStore) {
         setStore(myStore);
         fetchRatings(myStore.id);
+      } else {
+        setStore(null);
       }
     } catch (err) {
       console.error("Owner store fetch error:", err.response?.data || err.message);
+      setStore(null);
     }
   };
 
@@ -34,7 +37,7 @@ export default function OwnerDashboard() {
     try {
       const res = await ratingsAPI.getStoreRatings(storeId);
       setRatings(res.data.ratings || []);
-      setAverage(res.data.average_rating || 0);
+      setAverage(res.data.avg_rating || 0);
     } catch (err) {
       console.error("Ratings fetch error:", err.response?.data || err.message);
     } finally {
