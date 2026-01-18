@@ -7,8 +7,8 @@ if (!BACKEND) {
   console.error("VITE_BACKEND_URL is not defined");
 }
 
-// Your backend runs at root, not /api
-const API_BASE_URL = BACKEND;
+// Backend routes are under /api
+const API_BASE_URL = BACKEND + "/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -58,8 +58,8 @@ api.interceptors.response.use(
 
 // APIs
 export const authAPI = {
-  signup: (data) => api.post("/auth/signup", data),
-  login: (data) => api.post("/auth/login", data),
+  signup: (data) => api.post("/auth/signup", data),          // → /api/auth/signup
+  login: (data) => api.post("/auth/login", data),            // → /api/auth/login
   updatePassword: (data) => api.post("/auth/update-password", data),
 };
 
