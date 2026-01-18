@@ -5,6 +5,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StoresList from "./pages/StoresList";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminStores from "./pages/AdminStores";
 import OwnerDashboard from "./pages/OwnerDashboard";
 
 function ProtectedRoute({ children, allowedRoles }) {
@@ -44,6 +46,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/stores"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminStores />
           </ProtectedRoute>
         }
       />
