@@ -18,7 +18,17 @@ export default function StoresList() {
     setLoading(true);
     try {
       const response = await storesAPI.getStoresForUser({ q: searchTerm });
-      setStores(response.data.stores || []);
+      const storeData = response.data.stores || [];
+      setStores(storeData);
+
+      // preload user ratings in dropdown
+      const preset = {};
+      storeData.forEach((s) => {
+        if (s.user_rating !== null && s.user_rating !== undefined) {
+          preset[s.id] = String(s.user_rating);
+        }
+      });
+      setRatingForm(preset);
     } catch (err) {
       console.error("Error fetching stores:", err);
     } finally {
@@ -37,13 +47,20 @@ export default function StoresList() {
   };
 
   const submitRating = async (storeId) => {
+    const rating = ratingForm[storeId];
+
+    if (!storeId || !rating) {
+      alert("Please select a rating first");
+      return;
+    }
+
     try {
       await ratingsAPI.submitRating({
-        storeId: storeId,
-        rating: Number(ratingForm[storeId]),
+        store_id: storeId,
+        rating: Number(rating),
       });
+
       fetchStores(search);
-      setRatingForm({ ...ratingForm, [storeId]: "" });
     } catch (err) {
       console.error("Error submitting rating:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Rating failed");
@@ -69,39 +86,47 @@ export default function StoresList() {
         <p>Loading stores...</p>
       ) : (
         <div className="stores-grid">
-          {stores.map((store) => (
-            <div key={store.id} className="store-card">
-              <h3>{store.name}</h3>
-              <p>📍 {store.address}</p>
-              <p>Email: {store.email}</p>
+          {stores.map((store) => {
+            const hasUserRated =
+              store.user_rating !== null && store.user_rating !== undefined;
+            const selectedRating = ratingForm[store.id] || "";
 
-              <div className="rating-section">
-                <p>⭐ Rating: {store.avg_rating ?? "No ratings yet"}</p>
-                <p>Your Rating: {store.user_rating ?? "Not rated"}</p>
+            return (
+              <div key={store.id} className="store-card">
+                <h3>{store.name}</h3>
+                <p>📍 {store.address}</p>
+                <p>Email: {store.email}</p>
 
-                <div className="rating-input">
-                  <select
-                    value={ratingForm[store.id] || ""}
-                    onChange={(e) => handleRatingChange(store.id, e.target.value)}
-                  >
-                    <option value="">Select rating</option>
-                    <option value="1">1 - Poor</option>
-                    <option value="2">2 - Fair</option>
-                    <option value="3">3 - Good</option>
-                    <option value="4">4 - Very Good</option>
-                    <option value="5">5 - Excellent</option>
-                  </select>
+                <div className="rating-section">
+                  <p>⭐ Rating: {store.avg_rating ?? "No ratings yet"}</p>
+                  <p>Your Rating: {store.user_rating ?? "Not rated"}</p>
 
-                  <button
-                    disabled={!ratingForm[store.id]}
-                    onClick={() => submitRating(store.id)}
-                  >
-                    Submit Rating
-                  </button>
+                  <div className="rating-input">
+                    <select
+                      value={selectedRating}
+                      onChange={(e) =>
+                        handleRatingChange(store.id, e.target.value)
+                      }
+                    >
+                      <option value="">Select rating</option>
+                      <option value="1">1 - Poor</option>
+                      <option value="2">2 - Fair</option>
+                      <option value="3">3 - Good</option>
+                      <option value="4">4 - Very Good</option>
+                      <option value="5">5 - Excellent</option>
+                    </select>
+
+                    <button
+                      disabled={!selectedRating}
+                      onClick={() => submitRating(store.id)}
+                    >
+                      {hasUserRated ? "Update Rating" : "Submit Rating"}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {stores.length === 0 && <p>No stores found</p>}
         </div>
