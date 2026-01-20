@@ -59,7 +59,7 @@ Use these credentials to explore different user roles:
 | Role | Email | Password |
 |------|-------|----------|
 | **Admin** | admin@test.com | 123456789A@ |
-| **Store Owner** | owner2@test.com | 123456789@S |
+| **Store Owner** | owner.demo@roxiler.com | Owner@12345 |
 | **Normal User** | user2@test.com | 0987654321@N |
 
 ---
@@ -70,7 +70,7 @@ Use these credentials to explore different user roles:
 
 The admin role provides comprehensive system management capabilities:
 
-- **Dashboard Analytics:** View real-time statistics and system metrics
+- **Dashboard Analytics:** View real-time statistics 
 - **User Management:** Create, view, filter, search, and delete user accounts
 - **Store Management:** Create, assign owners, and delete stores
 - **Rating Oversight:** Access and monitor all user ratings across the platform
